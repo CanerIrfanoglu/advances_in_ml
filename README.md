@@ -76,9 +76,51 @@ Under the <b> Sampling </b> section there exists the CUSUM (Cumulative Sum) Filt
 
 ## Chapter 3 - Labelling
 
+Labelling is one of the most important sections as it introduces the <b> Triple-Barrier Method </b> and <b>Meta-Labeling</b> concepts. 
 
+### The Triple-Barrier Method
 
+A sophisticated labeling technique that mimics how a human trader thinks about a position. For each data point, we simulate a trade and see which of three "barriers" it hits first.
 
+* <b>Upper Barrier (Profit-Take)</b>: A price level above the entry for taking profit.
+* <b>Lower Barrier (Stop-Loss)</b>: A price level below the entry for cutting losses.
+* <b>Vertical Barrier (Time Limit)</b>: A maximum holding period for the trade.
+
+<p align="center">
+  <img src="readme_files/triple_visualization.png?raw=true" alt="Triple Barrier Method" title="Triple Barrier Method" width="600"/>
+</p>
+
+The resulting label is not just direction, but outcome:
+* 1: The profit-take horizontal barrier was hit.
+* -1: The stop-loss horizontal barrier was hit.
+* 0: The time limit (vertical barrier) was hit without touching the other barriers. (This can also be labelled with -1 for binary classification)
+
+This method creates labels that are directly tied to a trading strategy's P&L and risk profile.
+
+### Meta-Labeling: The Two-Stage Approach
+
+Meta-labeling is a powerful technique for improving an existing strategy. It separates the decision of what direction to bet from whether to bet at all.
+
+It works in two stages:
+
+* <b>Primary Model</b>: An initial, simpler model generates a prediction for the **side** of the bet (e.g., a mean-reversion model predicts "long").
+* <b>Meta-Model (The "Confidence" Model)</b>: A secondary ML model is trained to predict the probability that the primary model's bet will be successful (i.e., hit the profit-take barrier). It uses the binary outcome ({0, 1} where 1 = success) from the Triple-Barrier method as its target.
+
+#### Why Meta-Labeling is a Game-Changer
+
+* <b> Improves Precision</b>: It acts as a sophisticated filter, screening out the primary model's low-confidence bets.
+* <b> Reduces False Positives</b>: By avoiding bad trades, it significantly increases the strategy's Sharpe ratio.
+* <b>Controls Sizing</b>: The probability output from the meta-model can be used to determine the size of the bet (bet more on high-confidence predictions).
+
+<p align="center">
+  <img src="readme_files/confusion_matrix.png?raw=true" alt="Confusion Matrix" title="Confusion Matrix" width="600"/>
+</p>
+
+<u>Simple Workflow</u>
+
+* -> [Primary Model] -> Suggests a Bet (e.g., Long)
+* -> [Meta-Model] -> Predicts P(Success) > threshold? 
+* -> YES: Place the trade.  / -> NO: Pass on the trade.
 
 
 
