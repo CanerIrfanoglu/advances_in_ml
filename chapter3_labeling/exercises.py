@@ -23,22 +23,10 @@ if download_data:
 	btc_data.to_csv('./btc_sample.csv')
 
 # ------------------ Read Data -------------------------------------- #
-
-
-# btc_data = pd.read_csv('./btc_sample.csv')
-# btc_data['received_time'] = pd.to_datetime(btc_data['received_time'])
-# btc_data.set_index('received_time', inplace = True)
-
-
-print('Read Data ✅')
-
 # 3.1 Form dollar bars for E-mini S&P 500 futures:
 dollar_df_from_raw = False
 if dollar_df_from_raw:
     dollar_df = create_bars.aggregate_data(btc_data, bar_type='dollar', threshold=8000000)
-
-
-    dollar_df.to_csv('./dollar_df.csv')
 else:
      dollar_df = pd.read_csv('./data/dollar_df_2025_14_days.csv')
      dollar_df['timestamp'] = pd.to_datetime(dollar_df['timestamp'])

@@ -1,14 +1,16 @@
-# INTRODUCTION
-
-Advances In Financial Machine Learning is consisted of 5 Parts (Data Analysis, Modelling, Backtesting, Useful Financial Features and High-Performance Computing Receipes) with multiple Chapters under each part. The book is highly technical utilizing advanced mathematical equations frequently. Therefore one needs to study concepts introduced under each chapter to get the maximum benefit. With that said, this repository attempts reducing this density by higlighting the most important concepts, providing chapter summaries as well as the exercise solutions using sample bitcoin data.
+Advances In Financial Machine Learning is a highly technical book utilizing advanced mathematics throughout. Therefore one needs to study concepts introduced under each chapter to get the maximum benefit. With that said, this repository attempts reducing this density by higlighting the most important concepts, providing chapter summaries as well as the exercise solutions using sample bitcoin data.
 
 Exercises for following chapters are not included:
+
+Chapter 6  - Ensemble Methods: This chapter has all theoretical exercises for which the ChatGPT Chat Link is available
 
 Chapter 11 - The Dangers of Backtesting: This chapter is a warning mentioning common sins and exercises are covering cases where certain sins are committed.
 
 Chapter 16 - Machine Learning Asset Allocation: Skipped section since the concentration of this study is to concentrate initially on trading applications.
 
 Chapter 20/21/22 - These are sections belonging to High-Performance Computing Recipes Part. Previously utilized `mpPandasObj` parallelization function provided under Chapter 20. It would be ideal to refer this sections when training the models with actual vast amounts of data rather than exercise samples.
+
+ Book is consisted of 5 Parts (Data Analysis, Modelling, Backtesting, Useful Financial Features and High-Performance Computing Receipes) with multiple Chapters under each part. 
 
 ## Chapter 1 - PREAMBLE - Financial Machine Learning as a Distinct Subject
 
@@ -233,7 +235,7 @@ Larger d → faster decay → less memory, more like regular differencing.
 
 # PART II - MODELLING
 
-## Chapter 6 Ensemble Methods
+## Chapter 6 - Ensemble Methods
 
 Chapter 6 provides a timeless foundation on the principles of bagging and boosting, which remain essential knowledge. However, its toolkit is dated, as it predates the modern era of machine learning that began around its publication. The chapter underrepresents the now-ubiquitous, hyper-optimized gradient boosting libraries like XGBoost and LightGBM, and entirely omits the rise of deep learning architectures like Transformers for handling sequential data. Furthermore, it lacks modern interpretability frameworks like SHAP, which are now critical for explaining these complex models. While its concepts are fundamental, a practitioner today must supplement this chapter with these more powerful, contemporary methods.
 
@@ -283,5 +285,40 @@ Boosting is a sequential approach that focuses on reducing bias and building a s
 
 By using these ensemble techniques, we move away from the fragile search for a single perfect model and toward building robust, diversified, and more reliable predictive systems.
 
+## Chapter 7 - Cross Validation
 
+This chapter addresses a common mistake in quantitative finance: using standard cross-validation (CV) techniques on financial data. A flawed validation process is the primary reason why so many strategies that look brilliant in backtests fail in live trading. This chapter provides a robust solution to prevent this.
+
+### Why Standard K-Fold Cross-Validation Fails in Finance
+Standard K-Fold CV shuffles data and splits it randomly. This works for IID (Independent and Identically Distributed) data, but financial time series are not IID. Applying standard CV to financial data leads to a critical flaw: data leakage.
+
+<b>What is Data Leakage</b>?
+
+The training set becomes contaminated with information from the testing set. This happens because the labels (e.g., from the Triple-Barrier Method) are a function of future data. Shuffling can place a training observation before a testing observation, while its label was determined by information that occurred after that testing observation.
+
+<b>The Consequence:</b> The model is inadvertently trained on information from the future. Its performance in the backtest is artificially inflated because it's being evaluated on data it has already "seen." This leads to catastrophic overfitting and strategies that are guaranteed to fail.
+
+<b>The Solution:</b> Purged and Embargoed K-Fold Cross-Validation
+
+De Prado introduces a purpose-built CV method that respects the temporal nature of financial data and systematically eliminates leakage. It has two key components:
+
+### 1. Purging: Removing Tainted Training Data
+The first step is to clean the training set.
+
+<b>The Idea</b>: Go through the training set and remove ("purge") any observation whose label's evaluation period overlaps with the testing period.
+<b>The Result</b>: This ensures that the model is not trained on any data that could provide a hint about the testing set's outcomes.
+  
+  <p align="center">
+  <img src="readme_files/purging.png?raw=true" alt="Purging Illustration" title="Purging: Overlapping training labels are removed." width="700"/>
+  </p>
+
+### 2. Embargoing: Creating a Buffer Zone
+The second step is to prevent leakage from serial correlation (when one observation influences the next).
+<b>The Idea</b>: Place a small time gap or "embargo" period immediately after the end of the training data. This data is not used for either training or testing.
+
+<b>The Result</b>: This creates a buffer zone, ensuring that the performance on the first few test samples is not contaminated by information from the last few training samples (e.g., due to features with a look-ahead window like moving averages).
+
+  <p align="center">
+  <img src="readme_files/embargoing.png?raw=true" alt="Purging Illustration" title="Purging: Overlapping training labels are removed." width="700"/>
+  </p>
 
