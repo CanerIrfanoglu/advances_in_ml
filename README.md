@@ -37,7 +37,11 @@ Chapter 20/21/22 - These are sections belonging to High-Performance Computing Re
 
 * <b>Portfolio Managers</b>: Allocate capital across a portfolio of multiple strategies and manage the overall combined risk.
 
-# PART I -  DATA ANALYSIS
+# PART I - DATA ANALYSIS
+* Chapter 2 - Financial Data Structures
+* Chapter 3 - Labelling
+* Chapter 4 - Sample Weights
+* Chapter 5 - Fractionally differentiated Features
 
 ## Chapter 2 - Financial Data Structures
 <p align="center">
@@ -211,3 +215,73 @@ This allows us to create features that have the best of both worlds: they are st
 <p align="center">
   <img src="readme_files/fractional_diff.png?raw=true" alt="Fractional Diff" title="Fractional Diff" width="600"/>
 </p>
+
+🎯 What it does in simple terms:
+
+Instead of subtracting only the previous value (like in `P_t - P_{t-1}`),
+
+It subtracts a weighted sum of previous values.
+
+For example:
+
+```new_value_t = P_t - 0.9 * P_{t-1} - 0.8 * P_{t-2} - 0.7 * P_{t-3} ...```
+The weights decay over time.
+
+Smaller d → slower decay → more memory kept.
+
+Larger d → faster decay → less memory, more like regular differencing.
+
+# PART II - MODELLING
+
+## Chapter 6 Ensemble Methods
+
+Chapter 6 provides a timeless foundation on the principles of bagging and boosting, which remain essential knowledge. However, its toolkit is dated, as it predates the modern era of machine learning that began around its publication. The chapter underrepresents the now-ubiquitous, hyper-optimized gradient boosting libraries like XGBoost and LightGBM, and entirely omits the rise of deep learning architectures like Transformers for handling sequential data. Furthermore, it lacks modern interpretability frameworks like SHAP, which are now critical for explaining these complex models. While its concepts are fundamental, a practitioner today must supplement this chapter with these more powerful, contemporary methods.
+
+### Three Sources of Errors
+
+<p align="center">
+  <img src="readme_files/three_sources_of_errors.png?raw=true" alt="3 Sources" title="3 Sources" width="600"/>
+</p>
+
+
+
+### Key Ensemble Techniques
+There are two main families of ensemble methods, each with a different philosophy.
+#### 1. Bagging (Bootstrap Aggregating)
+Bagging focuses on reducing variance and creating stability by averaging out errors. It's a parallel approach where models are trained independently.
+
+<b>The Idea</b>: Create a "committee" of diverse models by training each one on a slightly different, random subset of the data.
+
+<b> How it Works</b>:
+
+* Bootstrap: Create multiple training datasets by sampling with replacement from the original data.
+* Train: Train one model (e.g., a Decision Tree) on each of these bootstrapped datasets.
+* Aggregate: For a new prediction, let all the models "vote" (for classification) or average their outputs (for regression). The majority/average decision is the final output.
+  
+<b>Why it Works</b>: Individual models might be unstable and overfit to noise in their specific dataset. By averaging them, their individual errors tend to cancel each other out, leading to a much more stable and reliable final prediction.
+
+#### 2. Random Forests
+Random Forest is a powerful and popular extension of bagging, specifically for decision trees. It introduces an extra layer of randomness to make the models even more diverse.
+
+<b>The Idea</b>: It's bagging, but with a twist to prevent the models from becoming too similar.
+
+<b>The Key Addition</b>: When building each decision tree, at every split point, the algorithm is only allowed to consider a random subset of the features. This process is called feature bagging. It forces the trees to be different from one another. Without it, every tree might learn to rely on the same one or two "super-predictive" features. By restricting the feature choice, Random Forest builds a more diverse committee of experts, making the overall model more robust if a key feature's signal fades.
+
+#### 3. Boosting
+Boosting is a sequential approach that focuses on reducing bias and building a single, highly accurate model by learning from mistakes.
+<b>The Idea</b>: Build a "chain" of weak models, where each new model is trained to correct the errors made by the previous ones.
+
+<b> How it Works</b>:
+
+1. Train a simple, "weak" base model on the data.
+2. Identify which observations the model got wrong.
+3. Train the next model, giving more weight and focus to the observations that the previous model misclassified.
+4. Repeat this process, with each new model focusing on the hardest remaining cases.
+5. The final prediction is a weighted sum of all the models' predictions.
+
+<b>Why it Works</b>: It converts a series of weak learners (models that are only slightly better than random guessing) into a single, powerful "strong learner." It's an expert at finding and modeling complex, non-linear patterns.
+
+By using these ensemble techniques, we move away from the fragile search for a single perfect model and toward building robust, diversified, and more reliable predictive systems.
+
+
+
