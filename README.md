@@ -122,6 +122,58 @@ It works in two stages:
 * -> [Meta-Model] -> Predicts P(Success) > threshold? 
 * -> YES: Place the trade.  / -> NO: Pass on the trade.
 
+## Chapter 4 - Sample Weights
+
+This chapter addresses a critical side-effect of the Triple-Barrier Method which is overlapping outcomes. It explains why this is a major problem for ML models and introduces methods for measuring this overlap (uniqueness) and correcting for it using sample weights.
+The core idea is that we have far fewer unique observations than our dataset size suggests.
+
+### 📌 The Core Problem:
+
+In financial data, labels are not IID (independent and identically distributed). Specifically:
+
+Some events (e.g., trading signals) overlap in time, so their outcomes are not independent.
+
+If you train a model on such overlapping events without adjusting for that, your model will overfit, double-count some information, and perform poorly out-of-sample.
+
+### 🧠 The Key Idea:
+
+To fix this, the chapter introduces a way to assign weights to samples (events) so that:
+
+Events with greater uniqueness get higher weight.
+
+Events that overlap a lot get down-weighted.
+
+This ensures your model is trained on more independent information.
+
+<p align="center">
+  <img src="readme_files/overlapping_events.png?raw=true" alt="Overlapping Events" title="Overlapping events" width="600"/>
+</p>
 
 
+### Measuring Overlap and Uniqueness
+#### Section 4.3: Number of Concurrent Labels
+This is the simplest way to measure redundancy. It asks: At any given point in time, how many different triple-barrier windows are active?
+This count, say `c_t`, measures the degree of overlap at a specific time t. A high `c_t` means that a price movement at this moment will affect many different labels, making it disproportionately influential.
 
+The instantaneous uniqueness at time t is defined as 1 / c_t. This forms the building block for the more advanced methods.
+
+
+#### Section 4.4: Average Uniqueness of a Label
+This section moves from measuring overlap at a single point in time to measuring the overall uniqueness of an entire label.
+A label's "average uniqueness" is calculated by averaging the instantaneous uniqueness `(1 / c_t)` over all the time steps in its evaluation window.
+
+For a label `i` spanning `T_i` time steps, its average uniqueness `u_i` is:
+
+```u_i = (Sum of 1/c_t for all t in label i's window) / T_i```
+
+This `u_i` value gives us a single, powerful number representing how redundant or unique a specific training example is. This is the value we can directly use as a sample weight during model training.
+
+#### Section 4.5: Bagging Classifiers and Uniqueness
+This section provides a crucial application of the uniqueness concept, specifically for ensemble methods like Random Forest or Bagging.
+
+Standard bagging (bootstrapping) samples data points with replacement. In finance, where labels overlap, this is dangerous. You are highly likely to select many redundant, non-unique samples, which makes your bootstrapped training sets very similar to each other. This defeats the purpose of bagging, which relies on model diversity from diverse sub-samples.
+
+The Solution Sequential Bootstrapping suggests that instead of sampling purely at random, we can use our uniqueness measure to guide the process.
+Draw samples sequentially.
+For each sample drawn, assign it a uniqueness value (e.g., using the average uniqueness from 4.4).
+The probability of drawing the next sample can be adjusted based on the uniqueness of the samples already drawn, ensuring the final bootstrapped set is more diverse.
