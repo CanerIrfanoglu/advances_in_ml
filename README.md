@@ -1,6 +1,8 @@
 # INTRODUCTION
 
-Advances In Financial Machine Learning is consisted of 5 Parts (DATA ANALYSIS, MODELLING, BACKTESTING, USEFUL FINANCIAL FEATURES, HIGH-PERFORMANCE COMPUTING RECIPES) with multiple Chapters under each part. The book is highly technical utilizing advanced mathematical equations frequently. Therefore one needs to study concepts introduced under each chapter to get maximum benefit. There are plenty of key ideas for building robust trading systems. This repository attempts, higlighting the most important concepts and provide chapter summaries under README. Also includes the exercise solutions that are found at the end of each chapter except for the following: 
+Advances In Financial Machine Learning is consisted of 5 Parts (Data Analysis, Modelling, Backtesting, Useful Financial Features and High-Performance Computing Receipes) with multiple Chapters under each part. The book is highly technical utilizing advanced mathematical equations frequently. Therefore one needs to study concepts introduced under each chapter to get the maximum benefit. With that said, this repository attempts reducing this density by higlighting the most important concepts, providing chapter summaries as well as the exercise solutions using sample bitcoin data.
+
+Exercises for following chapters are not included:
 
 Chapter 11 - The Dangers of Backtesting: This chapter is a warning mentioning common sins and exercises are covering cases where certain sins are committed.
 
