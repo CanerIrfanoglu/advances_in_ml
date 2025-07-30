@@ -386,4 +386,38 @@ This is the most critical part. The search method (random or grid) must be combi
 ```Hyper-Parameter Tuning = (Random Search + Focused Grid Search) + Purged K-Fold CV```
 
 
+# PART III - BACKTESTING
+
+## Chapter 10 - Bet Sizing
+
+<b><i>"How much should I bet?"</i></b> Getting the direction right is only half the battle. A model that makes many correct but low-conviction predictions can still lose money if it bets too much on the wrong trades. The chapter argues that the size of our position should be dynamic and directly proportional to the model's confidence in its prediction.
+
+
+### The Core Idea: Size Bets Based on Confidence
+
+The central principle remains the same: the size of our position should be a direct function of the model's confidence. High-confidence predictions should lead to larger bets, while low-confidence predictions should lead to smaller bets or no bet at all. This is where the Meta-Labeling technique from Chapter 3 is invaluable, as its purpose is to generate an accurate probability (p) of a strategy's success.
+
+<b>De Prado's Sizing Function</b>: The S-Shaped Curve
+
+Instead of a simple linear mapping, De Prado proposes using a function that generates an S-shaped (sigmoid) curve. This is a much safer and more realistic approach.
+
+<b>The Function</b>: The probability p is first converted into a standardized variable z, and then plugged into the Cumulative Distribution Function (CDF) of the standard Normal distribution.
+
+```
+1. z = (p - 0.5) / sqrt(p * (1-p))
+2. Bet Size = 2 * N(z) - 1, where N() is the Normal CDF.
+```
+
+<b>Why an S-Curve is Superior:</b>
+
+* It's Conservative: For probabilities close to 0.5 (low conviction), the bet size remains very small. It doesn't increase linearly.
+* It Ramps Up for High Conviction: The bet size only grows substantially when the model's probability p moves significantly away from 0.5 towards 0 or 1.
+* It Prevents Over-Betting: This non-linear mapping prevents the model from taking excessive risk on marginal signals, which is a major source of losses in strategies that use linear sizing.
+
+  <p align="center">
+  <img src="readme_files/betsize_s_curve.png?raw=true" alt="Bet Size S Curve" title="Bet Size S Curve" width="600"/>
+  </p>
+
+
+
 
