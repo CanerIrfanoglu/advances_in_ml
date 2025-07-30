@@ -322,3 +322,68 @@ The second step is to prevent leakage from serial correlation (when one observat
   <img src="readme_files/embargoing.png?raw=true" alt="Purging Illustration" title="Purging: Overlapping training labels are removed." width="700"/>
   </p>
 
+
+## Chapter 8 - Feature Importance
+
+  <p align="center">
+  <img src="readme_files/feature_importance.png?raw=true" alt="Feature Importance" title="Feature Importance" width="400"/>
+  </p>
+
+  <p align="center">
+  <img src="readme_files/mdi_mda_sfi.png?raw=true" alt="MDI vs MDA vs SFI" title="MDI vs MDA vs SFI" width="800"/>
+  </p>
+
+<b>MDA vs SFI: Which is more expensive?</b>
+
+SFI becomes more computationally expensive than MDA as the number of features (N) becomes large.
+
+While MDA has a high, fixed upfront cost (training the main model), SFI's cost scales directly with the number of features. In modern financial ML where datasets can have hundreds or thousands of potential features, the requirement to train a separate model for each one makes SFI the more resource-intensive method in terms of total CPU time.
+However, because SFI is perfectly parallelizable, its wall-clock time can be drastically reduced if you have a multi-core machine. Even so, for very large feature sets, MDA is generally the more computationally tractable approach.
+
+## Chapter 9 - Hyper-parameter Tuning
+
+This chapter tackles one of the final and most dangerous sources of backtest overfitting: hyper-parameter tuning. Choosing the right hyper-parameters (e.g., the number of trees in a Random Forest, the learning rate in a GBM) is critical for model performance.
+
+
+### The Problem with Standard Tuning Methods
+The go-to method for hyper-parameter tuning in many ML libraries is Grid Search with K-Fold Cross-Validation (GridSearchCV). This approach is doubly flawed in finance.
+
+<b>Combinatorial Explosion (The "Curse of Dimensionality")</b>:
+
+Grid search is a brute-force method that exhaustively tests every possible combination of parameters.
+With more than a few parameters, the number of models to train becomes computationally astronomical, making it impractical.
+
+<b>Data Leakage (The Fatal Flaw)</b>:
+
+Standard GridSearchCV uses standard K-Fold CV, which, as we learned in Chapter 7, is completely inappropriate for financial data.
+It leaks information from the future into the past, causing the search to select hyper-parameters that are not genuinely robust but simply overfit to the test sets used during cross-validation. This is a primary cause of strategies failing in the real world.
+
+### A Smarter, Safer Approach to Tuning
+
+De Prado advocates for a two-part solution that is both more efficient and, crucially, more robust.
+
+<b>1. The Search Method</b>: From Brute-Force to Intelligent Search. Instead of an exhaustive grid search, use a randomized approach.
+
+* <b>Randomized Search (RandomizedSearchCV)</b>: 
+  * Instead of testing every combination, this method randomly samples a fixed number of parameter combinations from the specified distributions.
+  * It is far more efficient and often finds equally good (or better) parameters than grid search in a fraction of the time.
+  
+* <b>The Coarse-to-Fine Workflow (Recommended)</b>:
+  * 1. Random Search: Begin with a randomized search across a wide range of parameter values.
+  * 2. Analyze: Identify the "promising regions" where the best-performing parameters were found.
+  * 3. Grid Search: Perform a much smaller, focused grid search only within those promising regions to fine-tune the final selection.
+
+<b>2. The Validation Method:</b> The Foundation of Reliability
+
+This is the most critical part. The search method (random or grid) must be combined with the robust cross-validation technique from Chapter 7.
+
+* Use Purged K-Fold Cross-Validation:
+  * When performing the randomized or grid search, you must use a Purged K-Fold CV object as the cross-validation splitter.
+  * This ensures that every evaluation performed during the hyper-parameter search is free from data leakage. Each fold is properly purged and embargoed.
+
+<b>The Final Workflow</b>
+
+```Hyper-Parameter Tuning = (Random Search + Focused Grid Search) + Purged K-Fold CV```
+
+
+
