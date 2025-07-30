@@ -502,4 +502,63 @@ Example: It might create a 20x20 grid, testing stop-losses from -0.5σ to -10σ 
   * 5b (Constrained Profit-Take): If your strategy already has a fixed profit target, use the results to find the optimal stop-loss that should accompany it.
   * 5c (Constrained Stop-Loss): If your fund has a mandatory maximum stop-loss, use the results to find the optimal profit-taking level to maximize returns for that given level of risk.
 
+## Chpter 14 - Backtest Statistics
+
+This chapter introduces the methods and indicators used in the industry for evaluating a strategies performance. It also builds on top of 
+the standardized Sharpe Ratio by introducing more robust performance evaluation metrics such as Probabilistic Sharpe Ratio (PSR) and Deflated Sharpe Ratio (DSR).
+
+
+
+### General Characteristics
+This section provides metrics that describe the fundamental operational nature, style, and potential biases of the strategy.
+
+* <b>Time range</b>: The start and end dates of the backtest. A longer period covering multiple market regimes is essential for robustness.
+* <b>Average AUM</b>: The average dollar value of Assets Under Management.
+* <b>Capacity</b>: The highest AUM the strategy can manage before performance degrades due to transaction costs and market impact.
+* <b>Leverage</b>: The amount of borrowing used, measured as the ratio of the average dollar position size to the average AUM.
+* <b>Maximum dollar position size</b>: The largest single position taken during the backtest. A value close to the average AUM is preferred, as it indicates the strategy doesn't rely on rare, extreme bets.
+* <b>Ratio of longs</b>: The proportion of bets that were long positions. For a market-neutral strategy, this should be close to 0.5. A significant deviation indicates a potential directional bias.
+* <b>Frequency of bets</b>: The number of bets per year. A "bet" is a complete cycle from a flat position to another flat position or a flip, not to be confused with the number of trades.
+* <b>Average holding period</b>: The average number of days a bet is held.
+* <b>Annualized turnover</b>: The ratio of the average dollar amount traded per year to the average annual AUM. This measures how actively the portfolio is managed.
+* <b>Correlation to underlying</b>: The correlation between the strategy's returns and the returns of its investment universe. A low correlation is desired to prove the strategy is generating unique alpha.
+
+### Performance
+This section lists the raw, unadjusted metrics that describe the strategy's absolute profitability before risk adjustments.
+
+* <b>PnL</b>: The total profit and loss in dollars (or the currency of denomination) over the entire backtest, including costs.
+* <b>PnL from long positions</b>: The portion of the total PnL generated exclusively by long positions. This is useful for assessing directional bias in long-short strategies.
+* <b>Annualized rate of return</b>: The time-weighted average annual rate of total return, as calculated by the TWRR method to correctly account for cash flows.
+* <b>Hit ratio</b>: The fraction of bets that resulted in a positive PnL.
+* <b>Average return from hits</b>: The average PnL for all profitable bets.
+* <b>Average return from misses</b>: The average PnL for all losing bets.
+
+### Runs and Drawdowns
+
+This category assesses the path-dependency and risk profile of the returns, which is crucial for non-IID financial series.
+
+* <b>Drawdown (DD)</b>: The maximum loss from a portfolio's peak value (high-water mark).
+* <b>Time Under Water (TuW)</b>: The longest time the strategy spent below a previous high-water mark.
+* <b>Returns Concentration (HHI)</b>: A key metric inspired by the Herfindahl-Hirschman Index. It measures whether PnL comes from a few massive wins (risky) or is distributed evenly across many small wins (robust). This is measured for both positive and negative returns, as well as concentration in time (e.g., all profits came in one month).
+
+### Implementation Shortfall
+This category grounds the backtest in reality by analyzing its sensitivity to real-world trading costs.
+
+* <b>Costs vs. PnL</b>: Measures performance relative to trading costs (brokerage fees, slippage).
+* <b>Return on Execution Costs</b>: A crucial ratio that shows how many dollars of profit are generated for every dollar spent on execution. A high multiple is needed to ensure the strategy can survive worse-than-expected trading conditions.
+
+### Efficiency (Risk-Adjusted Performance)
+<u>This is where the chapter introduces its most powerful statistical tools for judging performance after accounting for risk and selection bias.</u>
+
+* <b>Sharpe Ratio (SR)</b>: The standard but flawed metric.
+* <b>Probabilistic Sharpe Ratio (PSR)</b>: A superior metric that adjusts the SR for non-Normal returns (skewness, fat tails). It estimates the probability that the true SR is positive.
+* <b>Deflated Sharpe Ratio (DSR)</b>: It's a PSR that also corrects for selection bias by penalizing the result based on the number of strategies tried. It answers the question: "What is the probability this result is a fluke?"
+
+### Classification Scores
+These metrics are specifically for evaluating the performance of the meta-labeling model from Chapter 3.
+* <b>Accuracy, Precision, Recall</b>: Standard classification metrics.
+* <b>F1-Score</b>: The harmonic mean of precision and recall, which is a much better metric than accuracy when dealing with the imbalanced datasets typical in finance (i.e., many more "pass" signals than "bet" signals).
+  
+### Attribution
+This category seeks to understand where the PnL comes from by decomposing performance across different risk factors (e.g., duration, credit, sector, currency). This helps identify the true source of a portfolio manager's skill.
 
