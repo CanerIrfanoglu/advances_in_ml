@@ -410,14 +410,59 @@ Instead of a simple linear mapping, De Prado proposes using a function that gene
 
 <b>Why an S-Curve is Superior:</b>
 
-* It's Conservative: For probabilities close to 0.5 (low conviction), the bet size remains very small. It doesn't increase linearly.
-* It Ramps Up for High Conviction: The bet size only grows substantially when the model's probability p moves significantly away from 0.5 towards 0 or 1.
-* It Prevents Over-Betting: This non-linear mapping prevents the model from taking excessive risk on marginal signals, which is a major source of losses in strategies that use linear sizing.
+* <b>It's Conservative</b>: For probabilities close to 0.5 (low conviction), the bet size remains very small. It doesn't increase linearly.
+* <b>It Ramps Up for High Conviction</b>: The bet size only grows substantially when the model's probability p moves significantly away from 0.5 towards 0 or 1.
+* <b>It Prevents Over-Betting</b>: This non-linear mapping prevents the model from taking excessive risk on marginal signals, which is a major source of losses in strategies that use linear sizing.
 
   <p align="center">
   <img src="readme_files/betsize_s_curve.png?raw=true" alt="Bet Size S Curve" title="Bet Size S Curve" width="600"/>
   </p>
 
+## Chapter 11 - The Dangers of Backtesting
+
+This chapter is an easier read yet, it is very informative about commonpitfalls. Below figure represents the 7 sins but giving the whole chapter a read
+would still be helpful and practical when backtesting ML models.
 
 
+Seven Sins of Quantitative Investing” (Luo et al. [2014])
+  <p align="center">
+  <img src="readme_files/7_backtesting_sins.png?raw=true" alt="7 Sins of Backtesting" title="7 Sins of Backtesting" width="600"/>
+  </p>
 
+## Chapter 12 - Backtesting through Cross-Validation
+
+### The Problem with Traditional Walk-Forward Backtesting
+
+The standard industry approach to backtesting is "walk-forward," where a model is trained on a period of data and tested on the subsequent period, rolling this window through time.
+
+<b>The Flaw (Path-Dependence)</b>: This method evaluates the strategy on only one single path through history—the chronological one. It also does not utilize the data to its full poteintial. A strategy's entire backtest performance can be made or broken by a single lucky or unlucky period (like a crisis). It doesn't tell you if the strategy's logic is fundamentally sound, only how it performed on that one specific sequence of events. This makes it a poor estimator of future performance.
+
+<b>The Solution</b>: Backtesting as a Cross-Validation Problem
+
+De Prado's solution is to re-frame backtesting not as a single simulation, but as a cross-validation exercise. The goal is to test the strategy's logic across many different historical scenarios, not just one.
+
+<b>The Main Tool</b>: Combinatorial Purged Cross-Validation (CPCV)
+
+This is the chapter's core technique for implementing a robust backtest.
+
+* The Idea: Instead of one chronological path, we create many different historical paths by combining different data segments for training and testing.
+* The Workflow:
+1. Split the Data: Divide the entire dataset into N distinct, non-overlapping groups (e.g., 6 groups of 4 months each for a 2-year backtest).
+2. Form All Combinations: Create all possible train/test splits by taking every combination of k groups for training. For example, from the 6 groups, you would test all 15 combinations of 4 groups for training and 2 for testing.
+3. Run a Backtest on Each Path: For each of these combinatorial paths, run a full backtest. Crucially, each test split within a path must use the purging and embargoing techniques from Chapter 7 to prevent data leakage.
+4. Aggregate the Results: The final output is not a single performance metric (like one Sharpe Ratio), but a distribution of performance metrics from all the tested paths.
+
+  <p align="center">
+  <img src="readme_files/paths_generated.png?raw=true" alt="Paths Generated" title="Paths Generated" width="600"/>
+  </p>
+
+  <p align="center">
+  <img src="readme_files/path_assignment.png?raw=true" alt="Path Assignment" title="Path Assignment" width="600"/>
+  </p>
+
+</p>
+
+### Why This is a Game-Changer
+* <b>Path-Independence</b>: By averaging performance across many paths, the final result is not dependent on the luck of one specific historical sequence. It measures the robustness of the strategy's underlying logic.
+* <b>Provides a Distribution of Outcomes</b>: You get a full distribution of Sharpe Ratios. This allows you to assess the strategy's risk profile, such as the probability of failure (P[SR < 0]) and the stability of its performance.
+* <b>More Reliable Estimate</b>: The average performance across all combinatorial paths is a much more reliable and unbiased estimator of the strategy's true out-of-sample performance than a single walk-forward test.
