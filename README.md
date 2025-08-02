@@ -1,3 +1,78 @@
+- [PART 0 - INTRO](#part-0---intro)
+  - [Chapter 1 - PREAMBLE - Financial Machine Learning as a Distinct Subject](#chapter-1---preamble---financial-machine-learning-as-a-distinct-subject)
+- [PART I - DATA ANALYSIS](#part-i---data-analysis)
+  - [Chapter 2 - Financial Data Structures](#chapter-2---financial-data-structures)
+    - [Information-Driven Bars: A Better Alternative](#information-driven-bars-a-better-alternative)
+      - [ Standard Bars ](#-standard-bars-)
+      - [ Information Imbalance \& Run Bars ](#-information-imbalance--run-bars-)
+  - [Chapter 3 - Labelling](#chapter-3---labelling)
+    - [The Triple-Barrier Method](#the-triple-barrier-method)
+    - [Meta-Labeling: The Two-Stage Approach](#meta-labeling-the-two-stage-approach)
+      - [Why Meta-Labeling is a Game-Changer](#why-meta-labeling-is-a-game-changer)
+  - [Chapter 4 - Sample Weights](#chapter-4---sample-weights)
+    - [Measuring Overlap and Uniqueness](#measuring-overlap-and-uniqueness)
+      - [Section 4.3: Number of Concurrent Labels](#section-43-number-of-concurrent-labels)
+      - [Section 4.4: Average Uniqueness of a Label](#section-44-average-uniqueness-of-a-label)
+      - [Section 4.5: Bagging Classifiers and Uniqueness](#section-45-bagging-classifiers-and-uniqueness)
+  - [Chapter 5 - Fractionally Differentiated Features](#chapter-5---fractionally-differentiated-features)
+    - [The Stationarity vs. Memory Dilemma](#the-stationarity-vs-memory-dilemma)
+    - [The Standard Solution: Integer Differentiation](#the-standard-solution-integer-differentiation)
+    - [Fractional Differentiation (FracDiff)](#fractional-differentiation-fracdiff)
+- [PART II - MODELLING](#part-ii---modelling)
+  - [Chapter 6 - Ensemble Methods](#chapter-6---ensemble-methods)
+    - [Three Sources of Errors](#three-sources-of-errors)
+    - [Key Ensemble Techniques](#key-ensemble-techniques)
+      - [1. Bagging (Bootstrap Aggregating)](#1-bagging-bootstrap-aggregating)
+      - [2. Random Forests](#2-random-forests)
+      - [3. Boosting](#3-boosting)
+  - [Chapter 7 - Cross Validation](#chapter-7---cross-validation)
+    - [Why Standard K-Fold Cross-Validation Fails in Finance](#why-standard-k-fold-cross-validation-fails-in-finance)
+    - [1. Purging: Removing Tainted Training Data](#1-purging-removing-tainted-training-data)
+    - [2. Embargoing: Creating a Buffer Zone](#2-embargoing-creating-a-buffer-zone)
+  - [Chapter 8 - Feature Importance](#chapter-8---feature-importance)
+  - [Chapter 9 - Hyper-parameter Tuning](#chapter-9---hyper-parameter-tuning)
+    - [The Problem with Standard Tuning Methods](#the-problem-with-standard-tuning-methods)
+    - [A Smarter, Safer Approach to Tuning](#a-smarter-safer-approach-to-tuning)
+- [PART III - BACKTESTING](#part-iii---backtesting)
+  - [Chapter 10 - Bet Sizing](#chapter-10---bet-sizing)
+    - [The Core Idea: Size Bets Based on Confidence](#the-core-idea-size-bets-based-on-confidence)
+  - [Chapter 11 - The Dangers of Backtesting](#chapter-11---the-dangers-of-backtesting)
+  - [Chapter 12 - Backtesting through Cross-Validation](#chapter-12---backtesting-through-cross-validation)
+    - [The Problem with Traditional Walk-Forward Backtesting](#the-problem-with-traditional-walk-forward-backtesting)
+    - [Why This is a Game-Changer](#why-this-is-a-game-changer)
+  - [Chapter 13 - Synthetic Data](#chapter-13---synthetic-data)
+  - [Chapter 14 - Backtest Statistics](#chapter-14---backtest-statistics)
+    - [General Characteristics](#general-characteristics)
+    - [Performance](#performance)
+    - [Runs and Drawdowns](#runs-and-drawdowns)
+    - [Implementation Shortfall](#implementation-shortfall)
+    - [Efficiency (Risk-Adjusted Performance)](#efficiency-risk-adjusted-performance)
+    - [Classification Scores](#classification-scores)
+    - [Attribution](#attribution)
+  - [Chapter 15 - Understanding Strategy Risk](#chapter-15---understanding-strategy-risk)
+    - [The Symmetric Payouts Model](#the-symmetric-payouts-model)
+    - [The Asymmetric Payouts Model](#the-asymmetric-payouts-model)
+- [PART IV - USEFUL FINANCIAL FEATURES](#part-iv---useful-financial-features)
+  - [Chapter 17 - Structural Breaks](#chapter-17---structural-breaks)
+  - [Chapter 18 - Entropy Features](#chapter-18---entropy-features)
+    - [Shannon's Entropy](#shannons-entropy)
+    - [Encoding Schemes](#encoding-schemes)
+  - [Chapter 19 - Microstructural Features](#chapter-19---microstructural-features)
+    - [Summary Table of Key Microstructural Concepts \& Features](#summary-table-of-key-microstructural-concepts--features)
+- [PART V - HIGH-PERFORMANCE COMPUTING RECIPES](#part-v---high-performance-computing-recipes)
+  - [Chapter 20 - Multiprocessing and Vectorization](#chapter-20---multiprocessing-and-vectorization)
+    - [Vectorization](#vectorization)
+    - [Multiprocessing vs. Multithreading](#multiprocessing-vs-multithreading)
+    - [The "Atoms and Molecules" Framework](#the-atoms-and-molecules-framework)
+    - [Task Partitioning Strategies](#task-partitioning-strategies)
+    - [Building a Multiprocessing Engine](#building-a-multiprocessing-engine)
+    - [On-the-Fly Output Reduction](#on-the-fly-output-reduction)
+    - [Practical Example (Principal Component Analysis)](#practical-example-principal-component-analysis)
+  - [Chapter 21 - Brute Force and Quantum Computers](#chapter-21---brute-force-and-quantum-computers)
+  - [Chapter 22 - High-Performance Computational Intelligence andForecasting Technologies](#chapter-22---high-performance-computational-intelligence-andforecasting-technologies)
+
+# PART 0 - INTRO
+
 Advances In Financial Machine Learning is a highly technical book utilizing advanced mathematics throughout. Therefore one needs to study concepts introduced under each chapter to get the maximum benefit. With that said, this repository attempts reducing this density by higlighting the most important concepts, providing chapter summaries as well as the exercise solutions using sample bitcoin data.
 
 Exercises for following chapters are not included:
@@ -129,15 +204,12 @@ It works in two stages:
 This chapter addresses a critical side-effect of the Triple-Barrier Method which is overlapping outcomes. It explains why this is a major problem for ML models and introduces methods for measuring this overlap (uniqueness) and correcting for it using sample weights.
 The core idea is that we have far fewer unique observations than our dataset size suggests.
 
-### 📌 The Core Problem:
 
 In financial data, labels are not IID (independent and identically distributed). Specifically:
 
 Some events (e.g., trading signals) overlap in time, so their outcomes are not independent.
 
 If you train a model on such overlapping events without adjusting for that, your model will overfit, double-count some information, and perform poorly out-of-sample.
-
-### 🧠 The Key Idea:
 
 To fix this, the chapter introduces a way to assign weights to samples (events) so that:
 
