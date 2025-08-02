@@ -40,10 +40,6 @@ Chapter 20/21/22 - These are sections belonging to High-Performance Computing Re
 * <b>Portfolio Managers</b>: Allocate capital across a portfolio of multiple strategies and manage the overall combined risk.
 
 # PART I - DATA ANALYSIS
-* Chapter 2 - Financial Data Structures
-* Chapter 3 - Labelling
-* Chapter 4 - Sample Weights
-* Chapter 5 - Fractionally differentiated Features
 
 ## Chapter 2 - Financial Data Structures
 <p align="center">
@@ -502,7 +498,7 @@ Example: It might create a 20x20 grid, testing stop-losses from -0.5σ to -10σ 
   * 5b (Constrained Profit-Take): If your strategy already has a fixed profit target, use the results to find the optimal stop-loss that should accompany it.
   * 5c (Constrained Stop-Loss): If your fund has a mandatory maximum stop-loss, use the results to find the optimal profit-taking level to maximize returns for that given level of risk.
 
-## Chpter 14 - Backtest Statistics
+## Chapter 14 - Backtest Statistics
 
 This chapter introduces the methods and indicators used in the industry for evaluating a strategies performance. It also builds on top of 
 the standardized Sharpe Ratio by introducing more robust performance evaluation metrics such as Probabilistic Sharpe Ratio (PSR) and Deflated Sharpe Ratio (DSR).
@@ -561,4 +557,88 @@ These metrics are specifically for evaluating the performance of the meta-labeli
   
 ### Attribution
 This category seeks to understand where the PnL comes from by decomposing performance across different risk factors (e.g., duration, credit, sector, currency). This helps identify the true source of a portfolio manager's skill.
+
+## Chapter 15 - Understanding Strategy Risk
+This is a lighter chapter with the core objective of quantifying the strategy risk. It models a strategy as a series of binomial bets (profit or loss outcomes) to understand how sensitive its success is to its core parameters: betting frequency, precision, and the size of its wins and losses. The analysis progresses from a simplified model to a more realistic one.
+
+### The Symmetric Payouts Model
+The model assumes a strategy consists of a series of independent bets where:
+* There are n bets per year (frequency).
+* Each bet has a probability p of winning (precision).
+* <b><u>The payouts are symmetric</u></b>: a win yields a profit of +π and a loss yields an identical loss of -π.
+
+Under these assumptions, the chapter derives the formula for the annualized Sharpe Ratio (θ). This derivation leads to a critical insight:
+
+In the symmetric case, the payout size π cancels out of the Sharpe Ratio formula. The strategy's risk-adjusted performance depends only on its precision (p) and frequency (n).
+
+  <p align="center">
+  <img src="readme_files/symmetric_payouts.png?raw=true" alt="Symmetric Payouts" title="Symmetric Payouts" width="300"/>
+  </p>
+
+This simplified model provides that a strategy's success is a function of its statistical properties, not necessarily the size of its individual bets.
+
+### The Asymmetric Payouts Model
+This section lifts off the key constraint of the first model where returns are identical to build a more realistic and powerful framework for evaluating real-world strategies.
+
+The model defines for asymmetric payouts by:
+* A winning bet yields a profit of π+.
+* A losing bet results in a loss of π-.
+
+π+ does not have to be equal to |π-|.
+
+With this model, the Sharpe Ratio (θ) is now a function of all four parameters: precision (p), frequency (n), profit target (π+), and stop-loss (π-). Payouts no longer cancel out. The Sharpe Ratio formula becomes:
+
+  <p align="center">
+  <img src="readme_files/asymmetric_payouts.png?raw=true" alt="Symmetric Payouts" title="Symmetric Payouts" width="300"/>
+  </p>
+
+Onwards, there are visuals of the strategy results with varying combinations of these parameters.
+
+
+# PART IV - USEFUL FINANCIAL FEATURES
+
+## Chapter 17 - Structural Breaks
+
+This Chapter introduces CUSUM and Explosiveness Tests to identify structural breaks.
+
+<b>CUSUM tests</b>:The CUSUM (Cumulative Sum) filter introduced in Chapter 2 for sampling bars whenever some variable, like cumulative prediction errors, exceeded a predefined threshold. This concept is further extended to test for structrual breaks 
+
+<b>Explosiveness tests</b>: Beyond deviation from white noise, these test whether the process exhibits exponential growth or collapse, as this is inconsistent with a random walk or stationary process, and it is unsustainable in the long run.
+
+| Test Name | Core Idea | How it Works | Key Advantages | Key Drawbacks / Limitations |
+| :--- | :--- | :--- | :--- | :--- |
+| **Brown-Durbin-Evans CUSUM** | Detects breaks by testing if the cumulative sum of recursive forecasting errors deviates from a baseline of zero. | Uses Recursive Least Squares (RLS) to get 1-step-ahead prediction errors based on a feature set `x_t`. The cumulative sum of these standardized errors (`St`) is tested for statistical significance. | Incorporates the predictive power of external features (`x_t`) into the break detection process. | The results can be sensitive and inconsistent due to the arbitrary choice of the regression's starting point. |
+| **Chu-Stinchcombe-White CUSUM** | A simplified CUSUM test that works directly on a price series by assuming a "no change" forecast and detecting deviations from a reference point. | Computes the cumulative standardized deviation of the current price from a past reference price (`yn`). A significant deviation implies a break. | Computationally much simpler than the Brown-Durbin-Evans test as it does not require external features or recursive regressions. | Also suffers from the arbitrary choice of a reference level (`yn`), which can affect the results. |
+| **Chow-Type Dickey-Fuller** | A basic test designed to detect a *single* switch from a random walk to an explosive process at a *known* date. | It fits an autoregressive model using a dummy variable `D_t` that "activates" an explosive term after a pre-specified break date `τ*`. | Conceptually simple and easy to implement. | Highly impractical for finance as it requires knowing the break date `τ*` in advance and assumes only one break occurs. |
+| **Supremum ADF (SADF)** | The chapter's flagship method for detecting periodically collapsing bubbles without prior knowledge of the number or timing of the breaks. | Uses a double-loop algorithm. The outer loop advances the window's endpoint `t`. The inner loop runs ADF tests on all backward-expanding windows `[t0, t]`. The SADF statistic is the `supremum` (maximum) ADF value found in the inner loop. | Highly effective at detecting multiple, overlapping bubbles and their subsequent collapses. Does not require any prior assumptions about break dates. | **Extremely computationally expensive (`O(T^2)`).** The `supremum` statistic is very sensitive to single outliers, which can make it noisy. |
+| **Quantile ADF (QADF)** | A robust enhancement to the SADF test that is less sensitive to single outliers. | Instead of taking the absolute `supremum` (maximum) ADF statistic from the inner loop, it uses a high quantile (e.g., the 95th percentile) of the distribution of ADF statistics. | Provides a more stable and robust measure of "market explosiveness" compared to the standard SADF test. | Slightly more complex to calculate and requires choosing a quantile level (`q`). |
+| **Conditional ADF (CADF)** | A further enhancement to SADF that measures the *central tendency* of the right tail of the ADF distribution, making it even more robust. | It calculates the *average* of all ADF statistics from the inner loop that fall *above* a certain high quantile (e.g., above the 95th percentile). | Even more robust to extreme outliers than QADF because it averages the tail rather than picking a single point from the distribution. | Adds another layer of computational complexity. |
+| **Sub/Super Martingale Tests** | A family of alternative explosiveness tests that use different functional forms (not the ADF's autoregressive model) to detect bubbles. | Fits polynomial, exponential, or power-law trends to the data within the same double-loop framework as SADF. Includes a penalty term `(t-t0)^φ` to adjust the test's sensitivity to long-run vs. short-run bubbles. | Offers greater flexibility by not being tied to ADF's specific model assumptions. The `φ` parameter allows the test to be tuned for specific investment horizons. | Requires choosing an appropriate functional form (e.g., polynomial, exponential) and tuning the horizon parameter `φ`. |
+
+
+This chapter also notes the existence of literature studies carrying out structural breaks on raw prices.
+However, log prices are better due to their more preferable properties:
+
+<b>They Ensure Time-Symmetric Returns</b>: The magnitude of a log return is the same whether a price goes up or down. Simple percentages are not symmetric because the base of the calculation changes.
+
+<b>Example</b>: A move from $10 to $15 is a +50% simple return. The reverse move from $15 to $10 is a -33.3% simple return. With log returns, the move up is ln(15/10) ≈ +0.405, and the move down is ln(10/15) ≈ -0.405. The magnitude is identical.
+
+<b>They Make Returns Additive Over Time</b>: Simple returns are multiplicative, which is mathematically inconvenient. Log returns are additive, making them much easier to aggregate and analyze over time.
+
+<b>Example</b>: A stock goes from $10 -> $15 -> $18. The simple returns are +50% and +20%. The total return is +80%, which is not 50%+20%.
+
+The log returns are ln(1.5)≈0.405 and ln(1.2)≈0.182. The total log return is ln(1.8)≈0.587, which is the sum of the individual log returns.
+
+<b>Statistical Validity (Homoscedasticity)</b>: Log prices lead to a statistically valid model where return volatility is assumed to be constant, avoiding the unrealistic assumptions and errors (heteroscedasticity) that arise when testing raw prices. This is specicially critical for ADF/SADF test.
+
+<b>Example</b>:<br>
+With raw prices:<br>
+A stock goes from $10 -> $10.5. Return is $0.5.<br>
+Same stock a year later goes from $100 -> $105. Return is $5.<br>
+Although the volatility is the same 5%, returns in dollar terms has changed which would break the model.
+
+With logs:<br>
+$10 - $10.5. Return log(10.5) - log(10) = log(10.5/10) = 0.048 vs. <br>
+$100 - $105. Return log(105) - log(100) = log(105/100) = 0.48
+
 
