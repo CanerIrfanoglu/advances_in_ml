@@ -673,8 +673,7 @@ With these tools, entropy can be applied to finance in several ways:
 
 
 ## Chapter 19 - Microstructural Features
-This chapter offers a set of practical features part of it can be calculated directly
-from orderbook level data and other part can be calculated from the higher level bar data.
+This chapter offers a set of practical features part of it can be calculated directly from orderbook level data and other part can be calculated from the higher level bar data.
 
 <u>For the application of the features and deeper dive of the key ideas see the exercises where there is a link available for the gemini chat.</u>
 
@@ -694,3 +693,67 @@ from orderbook level data and other part can be calculated from the higher level
 | **Volume Concentration (HHI)** | The "lumpiness" of trading volume within a bar. | "Was the volume from one giant trade or a thousand tiny ones?" | Measures trade fragmentation. A rising concentration can signal that large players are becoming more aggressive. |
 | **Signed Volume Autocorrelation** | The persistence of buy/sell activity over consecutive trades. | "If I just saw an apple, what's the chance the next item is also an apple?" | The "order splitting" detector. A high positive value is a strong signature of a large institution working a single, massive order. |
 | **Volatility Ratio (`C2C / HL`)** | The character of volatility: jumps vs. ranges. | "Is the market trending in big jumps or just churning in place?" | A regime filter. A high ratio (>1) signals a trending, "gappy" market. A low ratio (<1) signals a range-bound, mean-reverting market. |
+
+# PART V - HIGH-PERFORMANCE COMPUTING RECIPES
+
+## Chapter 20 - Multiprocessing and Vectorization
+
+This chapter explains why and how to use parallel computing techniques—specifically vectorization and multiprocessing—to handle the computationally intensive nature of machine learning algorithms. It provides a blueprint for building a robust and reusable multiprocessing engine in Python.
+
+ML algorithms are computationally demanding. To be efficient, they must leverage all available CPU cores, whether on a single machine or a distributed cluster. The chapter introduces `mpPandasObj`, a function used throughout the book, as the primary tool for this.
+
+### Vectorization 
+
+Vectorization is the simplest form of parallelization, where operations are applied to entire arrays at once instead of using slow, explicit for loops. The chapter shows how to replace a nested loop for a Cartesian product with a more efficient, scalable, and dimension-agnostic solution using Python's itertools.
+
+### Multiprocessing vs. Multithreading
+In Python, the Global Interpreter Lock (GIL) limits true parallelism for CPU-bound tasks in multithreading by allowing only one thread to execute at a time per processor. Therefore, multiprocessing, which uses separate processes with their own memory space, is the standard way to achieve parallelism and fully utilize multiple CPU cores.
+
+### The "Atoms and Molecules" Framework
+<b>Atoms</b>: The smallest, indivisible computational tasks.
+<b>Molecules</b>: A group of atoms assigned to a single processor to be executed sequentially.
+The goal of parallelization is to partition all atoms into molecules in a way that balances the workload across all available processors, ensuring no single processor becomes a bottleneck.
+
+### Task Partitioning Strategies
+* <b>linParts (Linear Partitioning)</b>: The simplest method, which divides the list of atoms into equally sized molecules. This is suitable when all atomic tasks have similar complexity.
+
+* <b>nestedParts (Nested-Loop Partitioning)</b>: A more advanced method for tasks with varying complexity, such as in a nested loop where later iterations do more work (e.g., calculating a lower-triangular matrix). This algorithm creates molecules with a similar total computational load, even if they contain a different number of atoms, leading to much more efficient parallelization.
+
+### Building a Multiprocessing Engine
+The chapter details the construction of a generic engine to parallelize any function.
+* <b>Job Preparation (mpPandasObj)</b>: This function takes a user function, a list of "atoms" (e.g., a list of dates or tickers), and partitions them into molecules using linParts or nestedParts. It then creates a list of "jobs," where each job is a dictionary containing the function to call and the specific molecule (subset of atoms) to process.
+* <b>Asynchronous Execution (processJobs)</b>: It uses Python's multiprocessing library, specifically pool.imap_unordered, to distribute these jobs to a pool of worker processes. This method is asynchronous, meaning results are processed as they are completed, which is more efficient.
+* <b>Core Mechanics (expandCall, Pickling)</b>: The engine uses a helper function (expandCall) to unpack the job dictionary and call the user function with the correct arguments. It also includes a necessary workaround to handle the "pickling" of methods, which is required for sending tasks to other processes.
+
+### On-the-Fly Output Reduction
+A crucial enhancement for memory-intensive tasks is to process results as they become available, rather than collecting all outputs in a list and combining them at the end. The processJobsRedux function is introduced, which can apply a "redux" function (e.g., pd.DataFrame.add, list.append) to aggregate results on the fly, significantly reducing memory consumption and preventing crashes with large outputs.
+### Practical Example (Principal Component Analysis)
+The chapter concludes with a real-world example of calculating principal components on a dataset too large to fit in memory. By breaking the data into column-based files ("molecules") and processing them in parallel while aggregating the results on the fly, the engine solves a problem that is impossible on a single thread due to both time and memory constraints. This highlights that multiprocessing is essential not just for speed, but also for scalability and memory management.
+
+## Chapter 21 - Brute Force and Quantum Computers
+
+This chapter explores how to solve complex financial problems that are "intractable" for classical computers by reformulating them for quantum computers.
+
+Many financial optimization problems, such as dynamic portfolio allocation with realistic transaction costs, are combinatorial and NP-hard. This means finding the optimal solution with a standard computer would require a brute-force search that is computationally infeasible.
+
+Quantum computers, using qubits and the principle of superposition, can evaluate a vast number of potential solutions simultaneously. This makes them uniquely suited for solving the kind of brute-force optimization problems that overwhelm classical computers.
+
+The chapter presents a strategy to make a problem "quantum-ready":
+* <b>Discretize the Problem</b>: Convert a continuous problem (like portfolio weights) into a discrete integer problem. This is done by dividing capital into a set number of units (K) to be allocated among assets (N).
+* <b>Generate All Possibilities</b>: Frame the problem as finding the best combination among all possible allocation trajectories. This involves generating every feasible portfolio at each time step and then every possible path (trajectory) through time.
+* <b>Formulate for Brute Force</b>: This turns the problem into an exhaustive search, where the goal is to evaluate every single trajectory to find the one with the best Sharpe Ratio.
+
+While this brute-force approach is impossibly slow on a sequential, classical computer, it creates a structure that a quantum computer can solve efficiently. The chapter demonstrates that even the most complex financial ML problems can be tackled by translating them into a format solvable by the next generation of computing hardware.
+
+## Chapter 22 - High-Performance Computational Intelligence andForecasting Technologies
+
+"High-Performance Computational Intelligence and Forecasting Technologies," written by Kesheng Wu and Horst D. Simon from the Lawrence Berkeley National Laboratory (LBNL). The chapter details the work of their CIFT (Computational Intelligence and Forecasting Technologies) project.
+
+
+This chapter is  useful for researchers and engineers who work with massive, time-sensitive datasets (i.e., streaming data) and face computational bottlenecks. Its principles are applicable to finance (like high-frequency trading analysis), energy management (power grid stability), manufacturing, and scientific research where near real-time analysis of complex data is critical.
+
+The chapter argues that High-Performance Computing (HPC), traditionally used for large-scale scientific simulations, is superior to standard cloud computing for analyzing complex, high-volume streaming data, especially when low latency is required.
+
+While cloud platforms are designed for high-throughput, parallel tasks, their virtualization layer introduces significant performance overhead, making them slower for time-critical, interdependent calculations. HPC systems avoid this overhead and use specialized hardware and software to minimize latency and maximize performance.
+
+The main application of the HPC within the context of finance is a 720-fold speedup in calculating the VPIN (Volume-Synchronized Probability of Informed Trading) early-warning indicator.
