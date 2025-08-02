@@ -641,4 +641,35 @@ With logs:<br>
 $10 - $10.5. Return log(10.5) - log(10) = log(10.5/10) = 0.048 vs. <br>
 $100 - $105. Return log(105) - log(100) = log(105/100) = 0.48
 
+## Chapter 18 - Entropy Features
+
+This chapter introduces entropy as a way to measure the amount of information or, conversely, the degree of predictability contained within a financial price series.
+
+In perfect markets, prices are unpredictable because they instantly incorporate all available information. However, real markets are imperfect, containing informational asymmetries that create predictable patterns. The goal is to quantify this "informational content" to create features for machine learning models, which might learn, for example, that momentum strategies work best in low-information (predictable) environments and mean-reversion in high-information (random) ones.
+
+### Shannon's Entropy
+
+Measures the average uncertainty of a data source. A high entropy value signifies a complex, unpredictable series (like a fair coin toss), while low entropy signifies a simple, patterned, and redundant series (like a loaded die). The key intuition is that we learn the most from unexpected events.
+
+To apply this to a financial series, we need a way to estimate entropy. The chapter highlights two methods:
+
+* <b>Plug-in Estimator</b>: A straightforward method that calculates entropy based on the observed frequencies of different patterns in the data.
+
+* <b>Lempel-Ziv (LZ) Estimator</b>: A more powerful approach that measures a series's complexity by its compressibility. The intuition is that a highly random, high-entropy series is difficult to compress, whereas a patterned, low-entropy series is easily compressible. The Kontoyiannis algorithm is a key implementation of this idea.
+
+<u>Please see the exercises for applications of these methods.</u>
+
+### Encoding Schemes
+Since entropy estimators work on discrete symbols (like letters in a message), a continuous price series must first be converted into a string. This crucial step is called encoding. 
+
+* <b>Binary Encoding</b>: Assigning '1' for a positive return and '0' for a negative one.
+
+* <b>Quantile or Sigma Encoding</b>: Discretizing returns into several bins, either by ensuring each bin has the same number of observations (quantile) or by making each bin cover the same range of return values (sigma).
+
+With these tools, entropy can be applied to finance in several ways:
+* <b>Market Efficiency</b>: High entropy suggests an efficient, unpredictable market. Persistently low entropy can signal an inefficient market with redundant patterns, which may be a precursor to a bubble.
+* <b>Portfolio Concentration</b>: Entropy can measure the effective diversification of a portfolio's risk, offering a more nuanced view than simply counting assets.
+* <b>Market Microstructure (Adverse Selection)</b>: By calculating the entropy of the order flow imbalance (the sequence of net buying vs. selling pressure), we can estimate the risk of adverse selection. A predictable, low-entropy order flow is less risky for market makers, while a complex, high-entropy flow suggests the presence of informed traders, providing a powerful feature for predicting toxic market conditions.
+
+
 
