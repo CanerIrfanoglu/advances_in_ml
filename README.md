@@ -1,6 +1,6 @@
 - [PART 0 - INTRO](#part-0---intro)
   - [Chapter 1 - PREAMBLE - Financial Machine Learning as a Distinct Subject](#chapter-1---preamble---financial-machine-learning-as-a-distinct-subject)
-- [PART I - DATA ANALYSIS](#part-i---data-analysis)
+- [PART 1 - DATA ANALYSIS](#part-1---data-analysis)
   - [Chapter 2 - Financial Data Structures](#chapter-2---financial-data-structures)
     - [Information-Driven Bars: A Better Alternative](#information-driven-bars-a-better-alternative)
       - [ Standard Bars ](#-standard-bars-)
@@ -18,7 +18,7 @@
     - [The Stationarity vs. Memory Dilemma](#the-stationarity-vs-memory-dilemma)
     - [The Standard Solution: Integer Differentiation](#the-standard-solution-integer-differentiation)
     - [Fractional Differentiation (FracDiff)](#fractional-differentiation-fracdiff)
-- [PART II - MODELLING](#part-ii---modelling)
+- [PART 2 - MODELLING](#part-2---modelling)
   - [Chapter 6 - Ensemble Methods](#chapter-6---ensemble-methods)
     - [Three Sources of Errors](#three-sources-of-errors)
     - [Key Ensemble Techniques](#key-ensemble-techniques)
@@ -33,7 +33,7 @@
   - [Chapter 9 - Hyper-parameter Tuning](#chapter-9---hyper-parameter-tuning)
     - [The Problem with Standard Tuning Methods](#the-problem-with-standard-tuning-methods)
     - [A Smarter, Safer Approach to Tuning](#a-smarter-safer-approach-to-tuning)
-- [PART III - BACKTESTING](#part-iii---backtesting)
+- [PART 3 - BACKTESTING](#part-3---backtesting)
   - [Chapter 10 - Bet Sizing](#chapter-10---bet-sizing)
     - [The Core Idea: Size Bets Based on Confidence](#the-core-idea-size-bets-based-on-confidence)
   - [Chapter 11 - The Dangers of Backtesting](#chapter-11---the-dangers-of-backtesting)
@@ -52,14 +52,14 @@
   - [Chapter 15 - Understanding Strategy Risk](#chapter-15---understanding-strategy-risk)
     - [The Symmetric Payouts Model](#the-symmetric-payouts-model)
     - [The Asymmetric Payouts Model](#the-asymmetric-payouts-model)
-- [PART IV - USEFUL FINANCIAL FEATURES](#part-iv---useful-financial-features)
+- [PART 4 - USEFUL FINANCIAL FEATURES](#part-4---useful-financial-features)
   - [Chapter 17 - Structural Breaks](#chapter-17---structural-breaks)
   - [Chapter 18 - Entropy Features](#chapter-18---entropy-features)
     - [Shannon's Entropy](#shannons-entropy)
     - [Encoding Schemes](#encoding-schemes)
   - [Chapter 19 - Microstructural Features](#chapter-19---microstructural-features)
     - [Summary Table of Key Microstructural Concepts \& Features](#summary-table-of-key-microstructural-concepts--features)
-- [PART V - HIGH-PERFORMANCE COMPUTING RECIPES](#part-v---high-performance-computing-recipes)
+- [PART 5 - HIGH-PERFORMANCE COMPUTING RECIPES](#part-5---high-performance-computing-recipes)
   - [Chapter 20 - Multiprocessing and Vectorization](#chapter-20---multiprocessing-and-vectorization)
     - [Vectorization](#vectorization)
     - [Multiprocessing vs. Multithreading](#multiprocessing-vs-multithreading)
@@ -114,7 +114,7 @@ Chapter 20/21/22 - These are sections belonging to High-Performance Computing Re
 
 * <b>Portfolio Managers</b>: Allocate capital across a portfolio of multiple strategies and manage the overall combined risk.
 
-# PART I - DATA ANALYSIS
+# PART 1 - DATA ANALYSIS
 
 ## Chapter 2 - Financial Data Structures
 <p align="center">
@@ -301,7 +301,7 @@ Smaller d → slower decay → more memory kept.
 
 Larger d → faster decay → less memory, more like regular differencing.
 
-# PART II - MODELLING
+# PART 2 - MODELLING
 
 ## Chapter 6 - Ensemble Methods
 
@@ -454,7 +454,7 @@ This is the most critical part. The search method (random or grid) must be combi
 ```Hyper-Parameter Tuning = (Random Search + Focused Grid Search) + Purged K-Fold CV```
 
 
-# PART III - BACKTESTING
+# PART 3 - BACKTESTING
 
 ## Chapter 10 - Bet Sizing
 
@@ -667,7 +667,7 @@ With this model, the Sharpe Ratio (θ) is now a function of all four parameters:
 Onwards, there are visuals of the strategy results with varying combinations of these parameters.
 
 
-# PART IV - USEFUL FINANCIAL FEATURES
+# PART 4 - USEFUL FINANCIAL FEATURES
 
 ## Chapter 17 - Structural Breaks
 
@@ -766,7 +766,7 @@ This chapter offers a set of practical features part of it can be calculated dir
 | **Signed Volume Autocorrelation** | The persistence of buy/sell activity over consecutive trades. | "If I just saw an apple, what's the chance the next item is also an apple?" | The "order splitting" detector. A high positive value is a strong signature of a large institution working a single, massive order. |
 | **Volatility Ratio (`C2C / HL`)** | The character of volatility: jumps vs. ranges. | "Is the market trending in big jumps or just churning in place?" | A regime filter. A high ratio (>1) signals a trending, "gappy" market. A low ratio (<1) signals a range-bound, mean-reverting market. |
 
-# PART V - HIGH-PERFORMANCE COMPUTING RECIPES
+# PART 5 - HIGH-PERFORMANCE COMPUTING RECIPES
 
 ## Chapter 20 - Multiprocessing and Vectorization
 
